@@ -17,7 +17,6 @@ object Day1 : Solver {
 
     override fun solveb(input: List<String>): Any {
         return sumAll(input.map { it.trim() }).sortedDescending().take(3).sum()
-
     }
 
 }
