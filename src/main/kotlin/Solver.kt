@@ -9,13 +9,13 @@ interface Solver {
     fun solveb(input: String): Any {
         if (File(input).exists()) {
             val reader = BufferedReader(FileReader(input))
-            return solveb(reader.lines().map { it.trim() }.toList())
+            return solveb(reader.lines().map { it }.toList())
         } else if (File("in", input).exists()) {
             val reader = BufferedReader(FileReader(File("in", input)))
-            return solveb(reader.lines().map { it.trim() }.toList())
+            return solveb(reader.lines().map { it }.toList())
         } else if (File("advent2022/in", input).exists()) {
             val reader = BufferedReader(FileReader(File("advent2022/in", input)))
-            return solveb(reader.lines().map { it.trim() }.toList())
+            return solveb(reader.lines().map { it }.toList())
         }
         return solveb(input.split("\n").toList())
     }
@@ -26,13 +26,13 @@ interface Solver {
     fun solve(input: String): Any {
         if (File(input).exists()) {
             val reader = BufferedReader(FileReader(input))
-            return solve(reader.lines().map { it.trim() }.toList())
+            return solve(reader.lines().map { it }.toList())
         } else if (File("in", input).exists()) {
             val reader = BufferedReader(FileReader(File("in", input)))
-            return solve(reader.lines().map { it.trim() }.toList())
+            return solve(reader.lines().map { it }.toList())
         } else if (File("advent2022/in", input).exists()) {
             val reader = BufferedReader(FileReader(File("advent2022/in", input)))
-            return solve(reader.lines().map { it.trim() }.toList())
+            return solve(reader.lines().map { it }.toList())
         }
         return solve(input.split("\n").toList())
     }
