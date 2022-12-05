@@ -34,6 +34,7 @@ interface Solver {
 
     fun List<String>.join(): String = this.joinToString(separator = "")
 
+    fun <A> List<A>.splitAt(index: Int): List<List<A>> = listOf(this.take(index), this.drop(index))
 
     fun solveb(input: String): Any {
         if (File(input).exists()) {
