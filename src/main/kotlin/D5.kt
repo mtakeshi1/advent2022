@@ -20,37 +20,22 @@ object D5 : Solver {
         }
     }
 
-    fun parseOne(line: String) = (line.indices).step(4).map { line.substring(it, it + 3).trim().replace("[", "").replace("]", "") }
-
     override fun solve(input: List<String>): Any {
-        val stacks: List<Deque<String>> = parseStacks(input)
-        val moves = parseMoves(input)
+        val (ss, ms) = input.splitOnEmpty()
+        val sss = ss.dropLast(1).map { it.chunked(4).map { chunk -> chunk[1] } }.transposed().map { it.filter { c -> c != ' ' }.map { it.toString() } }
+        val stacks: List<Deque<String>> = sss.map { LinkedList(it) }
+        val moves = ms.ints3().map { (n, f, t) -> Move(n, f-1, t-1) }
         val result = moves.fold(stacks) { s, move -> move.apply(s) }
-        return result.joinToString(separator = "") { it.peekFirst() }
-    }
-
-    fun parseStacks(input: List<String>): List<Deque<String>> {
-        val init = input.takeWhile { it.isNotEmpty() }.dropLast(1).map { parseOne(it) }
-        val stacks: List<Deque<String>> = init[0].map { LinkedList() }
-        for (i in init[0].indices) {
-            init.forEach {
-                if (it[i].isNotEmpty()) stacks[i].add(it[i])
-            }
-        }
-        stacks.forEach { println(it) }
-        return stacks
-    }
-
-    fun parseMoves(input: List<String>): List<Move> {
-        return input.dropWhile { it.isNotEmpty() }.drop(1).map { Regex("move ([0-9]+) from ([0-9]+) to ([0-9]+)").matchEntire(it)!! }
-            .map { Move(it.groupValues[1].toInt(), it.groupValues[2].toInt() - 1, it.groupValues[3].toInt() - 1) }
+        return result.map{ it.peekFirst() }.join()
     }
 
     override fun solveb(input: List<String>): Any {
-        val stacks: List<Deque<String>> = parseStacks(input)
-        val moves = parseMoves(input)
+        val (ss, ms) = input.splitOnEmpty()
+        val sss = ss.dropLast(1).map { it.chunked(4).map { chunk -> chunk[1] } }.transposed().map { it.filter { c -> c != ' ' }.map { it.toString() } }
+        val stacks: List<Deque<String>> = sss.map { LinkedList(it) }
+        val moves = ms.ints3().map { (n, f, t) -> Move(n, f-1, t-1) }
         val result = moves.fold(stacks) { s, move -> move.applyB(s) }
-        return result.joinToString(separator = "") { it.peekFirst() }
+        return result.map{ it.peekFirst() }.join()
     }
 }
 
@@ -72,6 +57,6 @@ fun main() {
     )
 
 
-    println(D5.solve("day5.txt"))
-    println(D5.solveb("day5.txt"))
+    println(D5.solve("day5.txt") == "FRDSQRRCD")
+    println(D5.solveb("day5.txt") == "HRFTQVWNN")
 }
