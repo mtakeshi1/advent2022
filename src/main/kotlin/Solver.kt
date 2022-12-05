@@ -12,20 +12,19 @@ interface Solver {
         return Pair(first, second)
     }
 
-    fun List<String>.ints2(): List<Pair<Int, Int>> {
-        val re = Regex("(-?[0-9]+)")
-        return this.map {
-            val r: List<MatchResult> = re.findAll(it).toList()
-            Pair(r[0].value.toInt(), r[1].value.toInt())
-        }
+    fun List<String>.partitionOnEmpty(): List<List<String>> {
+        val head = listOf(this.takeWhile { it.isNotEmpty() })
+        val rest = this.drop(head[0].size+1)
+        return if(rest.isEmpty()) head else head + rest.partitionOnEmpty()
     }
 
-    fun List<String>.ints3(): List<Triple<Int, Int, Int>> {
+    fun List<String>.ints(): List<Int> = intsN().map { it.first() }
+    fun List<String>.ints2(): List<Pair<Int, Int>>  = intsN().map { Pair(it[0], it[1]) }
+    fun List<String>.ints3(): List<Triple<Int, Int, Int>> = intsN().map { Triple(it[0], it[1], it[1]) }
+
+    fun List<String>.intsN(): List<List<Int>> {
         val re = Regex("(-?[0-9]+)")
-        return this.map {
-            val r: List<MatchResult> = re.findAll(it).toList()
-            Triple(r[0].value.toInt(), r[1].value.toInt(), r[2].value.toInt())
-        }
+        return this.map { re.findAll(it).toList().map { found -> found.value.toInt() } }
     }
 
     fun <A> List<List<A>>.transposed(): List<List<A>> {

@@ -35,11 +35,11 @@ object D4 : Solver {
 
 
     override fun solve(input: List<String>): Any {
-        return input.map { Range.contained(it) }.count { it }
+        return input.count { Range.contained(it) }
     }
 
     override fun solveb(input: List<String>): Any {
-        return input.count {  Range.overlaps(it) }
+        return input.count { Range.overlaps(it) }
     }
 
 
@@ -59,5 +59,6 @@ fun main() {
         )
     )
 
-    println(D4.solveb("day4.txt"))
+    println(D4.solve("day4.txt") == 580)
+    println(D4.solveb("day4.txt") == 895)
 }

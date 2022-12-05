@@ -12,18 +12,21 @@ object Day1 : Solver {
     }
 
     override fun solve(input: List<String>): Any {
-        return sumAll(input.map { it.trim() }).max()
+        val list = input.partitionOnEmpty()
+        return list.map { elf -> elf.ints().sum() }.max()
     }
 
     override fun solveb(input: List<String>): Any {
-        return sumAll(input.map { it.trim() }).sortedDescending().take(3).sum()
+        return input.partitionOnEmpty().map { elf -> elf.ints().sum() }.sortedDescending().take(3).sum()
     }
 
 }
 
 
 fun main() {
-    println(Day1.solve("""
+    println(
+        Day1.solve(
+            """
         1000
         2000
         3000
@@ -38,9 +41,11 @@ fun main() {
         9000
 
         10000
-    """.trimIndent()))
+    """.trimIndent()
+        )
+    )
 
 
-    println(Day1.solve("day1.txt"))
-    println(Day1.solveb("day1.txt"))
+    println(Day1.solve("day1.txt") == 68292) //68292
+    println(Day1.solveb("day1.txt") == 203203) //203203
 }

@@ -12,19 +12,7 @@ object D2 : Solver {
     )
 
     //X for Rock, Y for Paper, and Z for Scissors. Winning every time would be
-
-    val combinationsB = listOf(
-        mapOf("Z" to "A", "Y" to "B", "X" to "C"),
-        mapOf("Z" to "A", "Y" to "C", "X" to "B"),
-        mapOf("Z" to "B", "Y" to "A", "X" to "C"),
-        mapOf("Z" to "B", "Y" to "C", "X" to "A"),
-        mapOf("Z" to "C", "Y" to "A", "X" to "B"),
-        mapOf("Z" to "C", "Y" to "B", "X" to "A")
-    )
-
     val baseScores = mapOf("A" to 1, "B" to 2, "C" to 3)
-
-    // A -> rock, B -> paper, C -> scissor
 
     fun score(left: String, you: String, map: Map<String, String>): Int {
         val actualMine = map[you]!!
