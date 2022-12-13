@@ -13,8 +13,6 @@ object D8 : Solver {
         }
     }
 
-    operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
-
     private fun visibleFrom(position: Pair<Int, Int>, matrix: List<List<Int>>, direction: Pair<Int, Int>): Boolean {
         var next = position + direction
         val height = matrix[position.first][position.second]
