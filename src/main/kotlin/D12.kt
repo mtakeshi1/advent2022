@@ -1,129 +1,103 @@
 package main.kotlin
 
-import kotlin.math.min
+import java.util.*
+import kotlin.collections.HashMap
 
 object D12 : Solver {
 
-    interface Signal : Comparable<Signal> {
-        override fun compareTo(other: Signal): Int
-        fun lessThan(other: Signal): Boolean = this < other
-        fun asList(): PList
-    }
+    val dirs = listOf(Pair(1, 0), Pair(-1, 0), Pair(0, 1), Pair(0, -1))
 
-    data class Value(val v: Int) : Signal {
-        override fun compareTo(other: Signal): Int {
-            return when (other) {
-                is Value -> this.v - other.v
-                else -> asList().compareTo(other)
+    val dirNames = listOf("S", "N", "E", "W")
+    val dirSymbols = listOf("V", "^", ">", "<")
+
+    fun findSymbol(from: Pair<Int, Int>, to: Pair<Int, Int>): String = (0 until 4).find { from + dirs[it] == to }.let { dirSymbols[it!!] }
+
+
+    data class PositionWithPredecessor(val pre: PositionWithPredecessor?, val pos: Pair<Int, Int>, val len: Int)
+
+    fun path(map: List<List<Char>>, startingPosition: Pair<Int, Int>, goal: Pair<Int, Int>, cache: MutableMap<Pair<Int, Int>, Int> = HashMap()): Int {
+        val cmp: Comparator<PositionWithPredecessor> = Comparator.comparing{a -> a.len * 10000 + a.pos.distanceFrom(goal)}
+        val fringe: PriorityQueue<PositionWithPredecessor> = PriorityQueue(cmp)
+        val visited: MutableSet<Pair<Int, Int>> = HashSet()
+        fringe.add(PositionWithPredecessor(null, startingPosition, 0))
+        while (fringe.isNotEmpty()) {
+            val withPredecessor = fringe.remove()
+            val pos = withPredecessor.pos
+            if(visited.contains(pos)) continue
+            val cached = cache[pos]
+            if(cached != null) {
+                return cached;
             }
-        }
-
-        override fun asList(): PList = PList(listOf(this))
-    }
-
-    data class PList(val entries: List<Signal>) : Signal {
-        override fun compareTo(other: Signal): Int {
-            return when (other) {
-                is Value -> this.compareTo(other.asList())
-                is PList -> compareToList(other.entries)
-                else -> TODO("Not yet implemented")
+            visited.add(pos)
+            if (map[pos.first][pos.second] == 'E') {
+                cache[pos] = withPredecessor.len
+                var pre = withPredecessor.pre
+                while (pre != null) {
+                    cache[pre.pos] = withPredecessor.len - pre.len
+                    pre = pre.pre
+                }
+                return withPredecessor.len
             }
+            neighboorsOf(pos, map).filter { !visited.contains(it) }.map { PositionWithPredecessor(withPredecessor, it, withPredecessor.len + 1) }
+                .forEach { fringe.add(it) }
         }
+        return Integer.MAX_VALUE
+    }
 
-        fun compareToList(other: List<Signal>): Int {
-            for (i in 0 until min(this.entries.size, other.size)) {
-                val c = this.entries[i].compareTo(other[i])
-                if (c != 0) return c
+    private fun neighboorsOf(pos: Pair<Int, Int>, map: List<List<Char>>): List<Pair<Int, Int>> {
+        fun symbol(r: Int, c: Int) = map[r][c].let { if (it == 'S') 'a' else if (it == 'E') 'z' else it }
+        val current = symbol(pos.first, pos.second)
+        val filter = dirs.map { pos + it }
+            .filter {
+                it.first >= 0 && it.second >= 0
+                        && it.first < map.size
+                        && it.second < map[it.first].size
+                        && symbol(it.first, it.second) <= (current + 1)
             }
-            return this.entries.size - other.size
-        }
-
-        override fun asList(): PList = this
+        return filter
     }
 
-    object EndOfInput : Signal {
-        override fun compareTo(other: Signal): Int = TODO()
-        override fun asList(): PList = TODO()
+    private fun collect(withPredecessor: PositionWithPredecessor, acc: List<Pair<Int, Int>> = emptyList()): List<Pair<Int, Int>> {
+        return if (withPredecessor.pre == null) acc + withPredecessor.pos
+        else collect(withPredecessor.pre, acc + withPredecessor.pos)
     }
 
-    fun parseNumber(line: String, start: Int): Pair<Signal, Int> {
-        var c = start
-        while (line[c] in '0'..'9') c++
-        val v = line.substring(start, c).toInt()
-        return Pair(Value(v), c)
-    }
-
-    fun parseList(line: String, start: Int): Pair<Signal, Int> {
-        val acc: MutableList<Signal> = ArrayList()
-        var nextOffset = start+1
-        while (line[nextOffset] != ']') {
-            if(line[nextOffset] == ',' || line[nextOffset] == ' ') {
-                nextOffset++
-            } else {
-                val (signal, nextIndex) = parsePacket(line, nextOffset)
-                acc.add(signal)
-                nextOffset = nextIndex
-            }
-        }
-        return Pair(PList(acc), nextOffset+1)
-    }
-
-    fun parsePacket(line: String, start: Int = 0): Pair<Signal, Int> {
-        return if (line[start] == '[') {
-            parseList(line, start)
-        } else if (line[start] in '0'..'9') {
-            parseNumber(line, start)
-        } else if (start < line.length) parsePacket(line, start + 1)
-        else Pair(EndOfInput, start+1)
-    }
-
-    fun parse(line: String) = parsePacket(line).first
 
     override fun solve(input: List<String>): Any {
-        return input.partitionOnEmpty().withIndex().map {
-            Pair(it.index + 1, parse(it.value[0]).compareTo(parse(it.value[1])))
-        }.filter { it.second < 0 }.sumOf { it.first }
-    }
+        val map = input.map { it.toList().toMutableList() }
 
+        val starting = map.withIndex().flatMap { row ->
+            row.value.withIndex().filter { col -> col.value == 'S' }.map { Pair(row.index, it.index) }
+        }.first()
+        val end = map.withIndex().flatMap { row ->
+            row.value.withIndex().filter { col -> col.value == 'E' }.map { Pair(row.index, it.index) }
+        }.first()
+        return path(map, starting, end)
+    }
     override fun solveb(input: List<String>): Any {
-        val div1 = parse("[[2]]")
-        val div2 = parse("[[6]]")
-        val sorted = (input.filter { it.isNotEmpty() }.map { parse(it) } + div1 + div2).sorted()
-        return (sorted.indexOf(div1)+1)*(sorted.indexOf(div2) + 1)
+        val map = input.map { it.toList().toMutableList() }
+        val startingPoints = map.withIndex().flatMap { row -> row.value.withIndex().filter { col -> col.value == 'a' }.map { Pair(row.index, it.index) } }
+        val cache: MutableMap<Pair<Int, Int>, Int> = HashMap()
+        val end = map.withIndex().flatMap { row -> row.value.withIndex().filter { col -> col.value == 'E' }.map { Pair(row.index, it.index) } }.first()
+        return startingPoints.map {
+            path(map, it, end, cache)
+        }.min()
     }
 
 }
 
 fun main() {
-    println(D12.parse("[[[]]]").compareTo(D12.parse("[[]]")))
-//    println(D12.parsePacket("[1,[2,[3,[4,[5,6,7]]]],8,9]"))
-    println(D12.solve("""
-        [1,1,3,1,1]
-        [1,1,5,1,1]
-
-        [[1],[2,3,4]]
-        [[1],4]
-
-        [9]
-        [[8,7,6]]
-
-        [[4,4],4,4]
-        [[4,4],4,4,4]
-
-        [7,7,7,7]
-        [7,7,7]
-
-        []
-        [3]
-
-        [[[]]]
-        [[]]
-
-        [1,[2,[3,[4,[5,6,7]]]],8,9]
-        [1,[2,[3,[4,[5,6,0]]]],8,9]
-    """.trimIndent()))
-
-    println(D12.solve("day12.txt"))
+    //v..v<<<<
+    //>v.vv<<^
+    //.>vv>E^^
+    //..v>>>^^
+    //..>>>>>^
+//    println(D12.solve("""
+//        Sabqponm
+//        abcryxxl
+//        accszExk
+//        acctuvwj
+//        abdefghi
+//    """.trimIndent()))
     println(D12.solveb("day12.txt"))
-
 }
