@@ -129,7 +129,7 @@ Monkey 3:
         )
     )
 
-    println(D11.solveb("input11.txt"))
+    println(D11.solveb("day11.txt"))
 
 }
 
