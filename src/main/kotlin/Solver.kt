@@ -10,6 +10,7 @@ interface Solver {
     operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
     fun Pair<Int, Int>.distanceFrom(other: Pair<Int, Int>): Int = abs(this.first - other.first) + abs(this.second - other.second)
 
+    fun Any.println() = println(this)
 
     fun List<String>.splitOnEmpty(): Pair<List<String>, List<String>> {
         val first = this.takeWhile { it.isNotEmpty() }

@@ -95,10 +95,10 @@ object D13 : Solver {
 }
 
 fun main() {
-    println(D12.parse("[[[]]]").compareTo(D12.parse("[[]]")))
+    println(D13.parse("[[[]]]").compareTo(D13.parse("[[]]")))
 //    println(D12.parsePacket("[1,[2,[3,[4,[5,6,7]]]],8,9]"))
     println(
-        D12.solve(
+        D13.solve(
             """
         [1,1,3,1,1]
         [1,1,5,1,1]
