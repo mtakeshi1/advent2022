@@ -4,13 +4,21 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 interface Solver {
 
     operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
     fun Pair<Int, Int>.distanceFrom(other: Pair<Int, Int>): Int = abs(this.first - other.first) + abs(this.second - other.second)
+    fun Pair<Int, Int>.touches(other: Pair<Int, Int>): Boolean {
+        return (this.first <= other.first && this.second >= other.first) ||
+                (this.first >= other.first && other.second >= this.first)
+    }
 
-    fun Any.println() = println(this)
+    fun Pair<Int, Int>.merge(other: Pair<Int, Int>): Pair<Int, Int> {
+        return Pair(min(this.first, other.first), max(this.second, other.second))
+    }
 
     fun List<String>.splitOnEmpty(): Pair<List<String>, List<String>> {
         val first = this.takeWhile { it.isNotEmpty() }

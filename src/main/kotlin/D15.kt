@@ -16,7 +16,7 @@ object D15 : Solver {
         }
     }
 
-    public var y = 10
+    var y = 10
 
     override fun solve(input: List<String>): Any {
         val inputs = input.intsN().map { (sx, sy, bx, by) -> Sensor(sx, sy, Pair(bx, by)) }
@@ -30,21 +30,10 @@ object D15 : Solver {
                 if (!beacons.contains(p) && !satelites.contains(p)) impossible.add(p)
             }
         }
-
         return impossible.size
     }
 
-    public var max = 20
-
-    fun Pair<Int, Int>.touches(other: Pair<Int, Int>): Boolean {
-        return (this.first <= other.first && this.second >= other.first) ||
-                (this.first >= other.first && other.second >= this.first)
-    }
-
-    fun Pair<Int, Int>.merge(other: Pair<Int, Int>): Pair<Int, Int> {
-        return Pair(min(this.first, other.first), max(this.second, other.second))
-    }
-
+    var max = 20
     fun mergeTouching(list: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
         return if (list.size < 2) list
         else {
@@ -61,14 +50,10 @@ object D15 : Solver {
         }
     }
 
-
     fun tuning(p: Pair<Int, Int>) = p.first.toLong() * 4000000L + p.second.toLong()
 
     override fun solveb(input: List<String>): Any {
         val inputs = input.intsN().map { (sx, sy, bx, by) -> Sensor(sx, sy, Pair(bx, by)) }
-        val beacons = inputs.map { Pair(it.x, it.y) }.toSet()
-        val satelites = inputs.map { it.beacon }.toSet()
-        val impossible = mutableSetOf<Pair<Int, Int>>()
 
         for (localY in 0..max) {
             val minMax = inputs.mapNotNull { it.minMaxXFor(localY) }.sortedBy { it.first }
@@ -78,17 +63,14 @@ object D15 : Solver {
             } else if (ranges.last().second < max) {
                 return tuning(Pair(ranges.last().second + 1, localY))
             } else if (ranges.size > 1) {
-                for(i in 0 until ranges.size - 1) {
+                for (i in 0 until ranges.size - 1) {
                     val p = ranges[i].second + 1
-                    if(p < max) return tuning(Pair(p, localY))
+                    if (p < max) return tuning(Pair(p, localY))
                 }
             }
-//            println("$localY -> $ranges")
         }
-
-        return impossible.size
+        TODO("no answer found")
     }
-
 }
 
 fun Any.println() = println(this)
