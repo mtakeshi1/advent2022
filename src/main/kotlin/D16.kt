@@ -1,6 +1,7 @@
 package main.kotlin
 
 import java.util.*
+import kotlin.math.min
 
 object D16 : Solver {
 
@@ -45,15 +46,16 @@ object D16 : Solver {
         if(openTunnels.containsAll(shortestDistances.keys) || movers.isEmpty()) return acc + openTunnels.sumOf { map[it]!!.flow } * remaining
         val reached = movers.filter { it.second == 0 }.map { it.first }
         if(reached.isNotEmpty()) {
-            val toVisit = shortestDistances.keys.filter { !openTunnels.contains(it) }.filter { map[it]!!.flow > 0 }.filter { !reached.contains(it) }
+            val toVisit = shortestDistances.keys.filter { !openTunnels.contains(it) }.filter { map[it]!!.flow > 0 }.filter { !movers.map { it.first }.contains(it) }
             val nextToMove = movers.filter { it.second > 0 }.map { Pair(it.first, it.second - 1) }
             val nextOpen = openTunnels + reached
             val nextRem = remaining - 1 // this is a problem because in the first round, both start at the same place with flow == 0
             val nextAcc = acc + reached.sumOf { map[it]!!.flow * nextRem }
 
-            val groupSize = reached.size.coerceAtMost(toVisit.size)
+            val groupSize = min(reached.size, toVisit.size)
             if(groupSize == 0) return nextAcc // nothing more to visit. Not sure I need this
-            return toVisit.allCombinations(groupSize).map { nextDestinations ->
+            val allCombinations = toVisit.allCombinations(groupSize)
+            return allCombinations.map { nextDestinations ->
                 val allPairsSortedByDistance = nextDestinations.flatMap { dest -> reached.map { Pair(it, dest) } }.sortedBy { shortestDistances[it.first]!![it.second]!! }
                 val nextAll: List<Pair<String, Int>> = allPairsSortedByDistance.distinctBy { it.second }.map { (from, to) -> Pair(to, shortestDistances[from]!![to]!!) } + nextToMove
                 maxFlowB(nextAll, shortestDistances,map, nextRem, nextOpen, nextAcc)
