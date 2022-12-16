@@ -1,6 +1,6 @@
 package main.kotlin
 
-import java.util.LinkedList
+import java.util.*
 
 object D16 : Solver {
 
@@ -18,43 +18,51 @@ object D16 : Solver {
     """.trimIndent()
 
     data class Valve(val name: String, val flow: Int, val destinations: List<String>) {
-//        fun maxFlow(map: Map<String, Valve>, remaining: Int = 30, openTunnels: Set<String> = HashSet()): Long {
-//            if (remaining <= 0 || openTunnels.containsAll(map.keys)) return 0
-//            return destinations.mapNotNull { map[it] }.flatMap { valve ->
-//                val ifOpenSelf = if (!openTunnels.contains(this.name) && flow > 0) {
-//                    val r = remaining - 1
-//                    listOf(flow * r + valve.maxFlow(map, r - 1, openTunnels + name))
-//                } else emptyList()
-//                ifOpenSelf + valve.maxFlow(map, remaining - 1, openTunnels)
-//            }.maxOrNull() ?: 0
-//        }
-
-        fun maxFlow(
-            shortestDistances: Map<String, Map<String, Int>>,
-            map: Map<String, Valve>,
-            remaining: Int = 30,
-            openTunnels: Set<String> = HashSet()
-        ): Long {
-            println("starting with $name, remaining: $remaining")
+        fun maxFlow(shortestDistances: Map<String, Map<String, Int>>, map: Map<String, Valve>, remaining: Int = 30, openTunnels: Set<String> = HashSet()): Long {
             if (remaining <= 0 || openTunnels.containsAll(shortestDistances.keys)) return 0L
-            var (localFlow, localRem, newOpen) = if (this.flow > 0 && !openTunnels.contains(this.name)) {
-                println("opening valve $name for $flow * ${remaining - 1}")
+            val (localFlow, localRem, newOpen) = if (this.flow > 0 && !openTunnels.contains(this.name)) {
                 Triple(this.flow * (remaining - 1), remaining - 1, openTunnels + this.name)
             } else Triple(0, remaining, openTunnels)
-            val toVisit =
-                (shortestDistances.keys - this.name).filter { !openTunnels.contains(it) }.filter { map[it]!!.flow > 0 }
+            val toVisit = (shortestDistances.keys - this.name).filter { !openTunnels.contains(it) }.filter { map[it]!!.flow > 0 }
             if (toVisit.isEmpty()) {
                 return localFlow.toLong()
             }
-            val best = toVisit.maxBy {
-                val distance = shortestDistances[this.name]!![it]!!
-                (localRem - distance-1) * map[it]!!.flow
-            }
-            localRem -= shortestDistances[this.name]!![best]!!
-//            println("moving to $best - remaining: $localRem")
-            return localFlow + map[best]!!.maxFlow(shortestDistances, map, localRem, newOpen)
+            return toVisit.map { next ->
+                val distance = shortestDistances[this.name]!![next]!!
+                val nextRem = localRem - distance
+                map[next]!!.maxFlow(shortestDistances, map, nextRem, newOpen)
+            }.max() + localFlow
         }
 
+    }
+
+    /*
+     * me -> if .second == 0, I'm standing on this room
+     *
+     */
+    fun maxFlowB(movers: List<Pair<String, Int>>, shortestDistances: Map<String, Map<String, Int>>, map: Map<String, Valve>, remaining: Int = 26, openTunnels: Set<String> = HashSet(), acc: Int = 0): Int {
+        if(remaining <= 0) return acc
+        if(openTunnels.containsAll(shortestDistances.keys) || movers.isEmpty()) return acc + openTunnels.sumOf { map[it]!!.flow } * remaining
+        val reached = movers.filter { it.second == 0 }.map { it.first }
+        if(reached.isNotEmpty()) {
+            val toVisit = shortestDistances.keys.filter { !openTunnels.contains(it) }.filter { map[it]!!.flow > 0 }.filter { !reached.contains(it) }
+            val nextToMove = movers.filter { it.second > 0 }.map { Pair(it.first, it.second - 1) }
+            val nextOpen = openTunnels + reached
+            val nextRem = remaining - 1
+            val nextAcc = acc + reached.sumOf { map[it]!!.flow * nextRem }
+
+            val groupSize = reached.size.coerceAtMost(toVisit.size)
+            if(groupSize == 0) return nextAcc // nothing more to visit. Not sure I need this
+            return toVisit.allCombinations(groupSize).map { nextDestinations ->
+                val allPairsSortedByDistance = nextDestinations.flatMap { dest -> reached.map { Pair(it, dest) } }.sortedBy { shortestDistances[it.first]!![it.second]!! }
+                val nextAll: List<Pair<String, Int>> = allPairsSortedByDistance.distinctBy { it.second }.map { (from, to) -> Pair(to, shortestDistances[from]!![to]!!) } + nextToMove
+                maxFlowB(nextAll, shortestDistances,map, nextRem, nextOpen, nextAcc)
+            }.max()
+        } else {
+            val turns = movers.minOf { it.second }
+            val nextMovers = movers.map { it.copy(second = it.second-1) }
+            return maxFlowB(nextMovers, shortestDistances, map, remaining - turns, openTunnels, acc)
+        }
     }
 
 
@@ -97,15 +105,23 @@ object D16 : Solver {
     override fun solve(input: List<String>): Any {
         val valves = input.map { parseValve(it) }.map { it.name to it }.toMap()
         val shortest = allShortestDistances(valves)
-        for (name in valves.keys) {
-            println("$name (${valves[name]?.flow}) -> ${shortest[name]}")
-        }
-        println("")
         return valves["AA"]!!.maxFlow(shortest, valves)
     }
+
+    override fun solveb(input: List<String>): Any {
+        val valves = input.map { parseValve(it) }.associateBy { it.name }
+        val shortest = allShortestDistances(valves)
+        return maxFlowB(listOf(Pair("AA", 0), Pair("AA", 0)), shortest, valves)
+    }
+
+    fun <A> combs(list: List<A>, size: Int) = list.allCombinations(size)
+
 
 }
 
 fun main() {
-    D16.solveSample()
+//    D16.solveSample()
+//    println(D16.solve("day16.txt"))
+    D16.solveSampleB()
 }
+

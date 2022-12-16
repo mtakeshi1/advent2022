@@ -13,6 +13,29 @@ interface Solver {
 
     fun solveSample() = println(solve(sample()))
 
+    fun solveSampleB() = println(solveb(sample()))
+
+    fun <A> List<A>.allPairs(): List<Pair<A, A>> {
+        return if(this.size <= 1) emptyList()
+        else {
+            val f = this.first()
+            val r = this.drop(1)
+            r.map { Pair(f, it) } + r.allPairs()
+        }
+    }
+
+    fun <A> List<A>.allCombinations(size: Int): List<List<A>> {
+        if(this.isEmpty() || this.size < size) return emptyList()
+        else if(size == 1) return this.map { listOf(it) }
+        else {
+            val remaining = this.indices.map { Pair(this[it], this.drop(it + 1)) }.filter { it.second.size >= (size-1) }
+//            println(remaining)
+            return remaining.flatMap { (el, rest) ->
+                rest.allCombinations(size - 1).map { listOf(el) + it }
+            }
+        }
+    }
+
     operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
     fun Pair<Int, Int>.distanceFrom(other: Pair<Int, Int>): Int = abs(this.first - other.first) + abs(this.second - other.second)
     fun Pair<Int, Int>.touches(other: Pair<Int, Int>): Boolean {
