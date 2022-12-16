@@ -40,7 +40,7 @@ object D16 : Solver {
      * me -> if .second == 0, I'm standing on this room
      *
      */
-    fun maxFlowB(movers: List<Pair<String, Int>>, shortestDistances: Map<String, Map<String, Int>>, map: Map<String, Valve>, remaining: Int = 26, openTunnels: Set<String> = HashSet(), acc: Int = 0): Int {
+    fun maxFlowB(movers: List<Pair<String, Int>>, shortestDistances: Map<String, Map<String, Int>>, map: Map<String, Valve>, remaining: Int = 27, openTunnels: Set<String> = HashSet(), acc: Int = 0): Int {
         if(remaining <= 0) return acc
         if(openTunnels.containsAll(shortestDistances.keys) || movers.isEmpty()) return acc + openTunnels.sumOf { map[it]!!.flow } * remaining
         val reached = movers.filter { it.second == 0 }.map { it.first }
@@ -48,7 +48,7 @@ object D16 : Solver {
             val toVisit = shortestDistances.keys.filter { !openTunnels.contains(it) }.filter { map[it]!!.flow > 0 }.filter { !reached.contains(it) }
             val nextToMove = movers.filter { it.second > 0 }.map { Pair(it.first, it.second - 1) }
             val nextOpen = openTunnels + reached
-            val nextRem = remaining - 1
+            val nextRem = remaining - 1 // this is a problem because in the first round, both start at the same place with flow == 0
             val nextAcc = acc + reached.sumOf { map[it]!!.flow * nextRem }
 
             val groupSize = reached.size.coerceAtMost(toVisit.size)
