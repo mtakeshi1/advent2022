@@ -39,12 +39,12 @@ object D16 : Solver {
             if (remaining <= 0 || openTunnels.containsAll(shortestDistances.keys)) return 0L
             var (localFlow, localRem, newOpen) = if (this.flow > 0 && !openTunnels.contains(this.name)) {
                 println("opening valve $name for $flow * ${remaining - 1}")
-                Triple(this.flow * remaining - 1, remaining - 1, openTunnels + this.name)
+                Triple(this.flow * (remaining - 1), remaining - 1, openTunnels + this.name)
             } else Triple(0, remaining, openTunnels)
             val toVisit =
                 (shortestDistances.keys - this.name).filter { !openTunnels.contains(it) }.filter { map[it]!!.flow > 0 }
             if (toVisit.isEmpty()) {
-                return 0L
+                return localFlow.toLong()
             }
             val best = toVisit.maxBy {
                 val distance = shortestDistances[this.name]!![it]!!
