@@ -9,6 +9,10 @@ import kotlin.math.min
 
 interface Solver {
 
+    fun sample(): String = ""
+
+    fun solveSample() = println(solve(sample()))
+
     operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
     fun Pair<Int, Int>.distanceFrom(other: Pair<Int, Int>): Int = abs(this.first - other.first) + abs(this.second - other.second)
     fun Pair<Int, Int>.touches(other: Pair<Int, Int>): Boolean {
