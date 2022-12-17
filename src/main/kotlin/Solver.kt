@@ -3,6 +3,7 @@ package main.kotlin
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
+import java.lang.RuntimeException
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -12,11 +13,20 @@ interface Solver {
     fun sample(): String = ""
 
     fun solveSample() = println(solve(sample()))
+    fun solveSample(expected: Any) {
+        val message = solve(sample())
+        if (message != expected) throw RuntimeException("expected $expected but got: $message")
+        println(message)
+    }
 
     fun solveSampleB() = println(solveb(sample()))
-
+    fun solveSampleB(expected: Any) {
+        val message = solveb(sample())
+        if (message != expected) throw RuntimeException("expected $expected but got: $message")
+        println(message)
+    }
     fun <A> List<A>.allPairs(): List<Pair<A, A>> {
-        return if(this.size <= 1) emptyList()
+        return if (this.size <= 1) emptyList()
         else {
             val f = this.first()
             val r = this.drop(1)
@@ -25,10 +35,11 @@ interface Solver {
     }
 
     fun <A> List<A>.allCombinations(size: Int): List<List<A>> {
-        if(this.isEmpty() || this.size < size) return emptyList()
-        else if(size == 1) return this.map { listOf(it) }
+        if (this.isEmpty() || this.size < size) return emptyList()
+        else if (size == 1) return this.map { listOf(it) }
         else {
-            val remaining = this.indices.map { Pair(this[it], this.drop(it + 1)) }.filter { it.second.size >= (size-1) }
+            val remaining =
+                this.indices.map { Pair(this[it], this.drop(it + 1)) }.filter { it.second.size >= (size - 1) }
 //            println(remaining)
             return remaining.flatMap { (el, rest) ->
                 rest.allCombinations(size - 1).map { listOf(el) + it }
@@ -37,7 +48,9 @@ interface Solver {
     }
 
     operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
-    fun Pair<Int, Int>.distanceFrom(other: Pair<Int, Int>): Int = abs(this.first - other.first) + abs(this.second - other.second)
+    fun Pair<Int, Int>.distanceFrom(other: Pair<Int, Int>): Int =
+        abs(this.first - other.first) + abs(this.second - other.second)
+
     fun Pair<Int, Int>.touches(other: Pair<Int, Int>): Boolean {
         return (this.first <= other.first && this.second >= other.first) ||
                 (this.first >= other.first && other.second >= this.first)
@@ -55,12 +68,12 @@ interface Solver {
 
     fun List<String>.partitionOnEmpty(): List<List<String>> {
         val head = listOf(this.takeWhile { it.isNotEmpty() })
-        val rest = this.drop(head[0].size+1)
-        return if(rest.isEmpty()) head else head + rest.partitionOnEmpty()
+        val rest = this.drop(head[0].size + 1)
+        return if (rest.isEmpty()) head else head + rest.partitionOnEmpty()
     }
 
     fun List<String>.ints(): List<Int> = intsN().map { it.first() }
-    fun List<String>.ints2(): List<Pair<Int, Int>>  = intsN().map { Pair(it[0], it[1]) }
+    fun List<String>.ints2(): List<Pair<Int, Int>> = intsN().map { Pair(it[0], it[1]) }
     fun List<String>.ints3(): List<Triple<Int, Int, Int>> = intsN().map { Triple(it[0], it[1], it[1]) }
 
     fun List<String>.intsN(): List<List<Int>> {
