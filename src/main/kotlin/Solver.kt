@@ -33,6 +33,8 @@ interface Solver {
             r.map { Pair(f, it) } + r.allPairs()
         }
     }
+    fun <A> infiniteSequenceOf(list: List<A>): Sequence<A> = generateSequence(0) {it + 1}.map { list[it % list.size] }
+
 
     fun <A> List<A>.allCombinations(size: Int): List<List<A>> {
         if (this.isEmpty() || this.size < size) return emptyList()
