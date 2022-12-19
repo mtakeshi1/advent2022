@@ -52,6 +52,9 @@ interface Solver {
         }
     }
 
+    fun <A> Map<A, Int>.mergePlus(other: Map<A, Int>): Map<A, Int> = (this.keys + other.keys).map { key -> key to (this.getOrDefault(key, 0) + other.getOrDefault(key, 0)) }.toMap()
+    fun <A> Map<A, Int>.mergeMinus(other: Map<A, Int>): Map<A, Int> = (this.keys + other.keys).map { key -> key to (this.getOrDefault(key, 0) - other.getOrDefault(key, 0)) }.toMap()
+
     operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
     fun Pair<Int, Int>.distanceFrom(other: Pair<Int, Int>): Int =
         abs(this.first - other.first) + abs(this.second - other.second)
