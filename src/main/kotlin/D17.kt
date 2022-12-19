@@ -1,5 +1,7 @@
 package main.kotlin
 
+import java.util.TreeMap
+
 object D17 : Solver {
 
     val floor = 0
@@ -122,13 +124,16 @@ object D17 : Solver {
 
     }
 
+    data class State(val shape: Shape, val shapeIndex: Int, val patternIndex: Int)
+    data class Position(val iterationIndex: Long, val accumulatedHeight: Long)
+
     fun solvebManual(input: String, max: Long = 1000000000000L): Any {
         val pattern = fileOrString(input).first()
         val patternSequence = wrappingSequence(pattern.length).iterator()
         val shapeIndexSequence = wrappingSequence(allShapeList.size).iterator()
         var accShape = Shape(emptySet())
         var accHeight = 0L
-        val map: MutableMap<Triple<Shape, Int, Int>, Pair<Long, Long>> = hashMapOf()
+        val map: MutableMap<State, Position> = hashMapOf()
 
         fun moveShapeB(next: Shape, allShapes: List<Shape>): Pair<Shape, Int> {
             var wind = patternSequence.next()
@@ -139,37 +144,38 @@ object D17 : Solver {
             }
             return Pair(s.first, wind)
         }
-        map[Triple(accShape, 0, 0)] = Pair(0L, 0L)
-        var its = 0L
-        var same = 0
-        var firstRepeat: Pair<Triple<Shape, Int, Int>, Pair<Long, Long>> = Pair(Triple(accShape, 0, 0), Pair(0, 0))
-        while (same < 5000) {
+        map[State(accShape, 0, 0)] = Position(0L, 0L)
+        var its = 1L
+        var firstRepeat: Pair<State, Position> = Pair(State(accShape, 0, 0), Position(0, 0))
+        val allShapeMap = TreeMap<Long, Shape>()
+        while (true) {
             val shapeIndex = shapeIndexSequence.next();
             val existing = listOf(accShape)
             val (next, wind) = moveShapeB(allShapeList[shapeIndex].spawn(existing), existing)
             val (deleted, newShape) = simplify(Shape(accShape.points + next.points))
             accShape = newShape
             accHeight += deleted
-            val key= Triple(accShape, shapeIndex, wind)
+            val key= State(accShape, shapeIndex, wind)
             val prev = map[key]
             if(prev != null) {
-                println("previous iteration ${map[key]}, current iteration $its, shapeIndex: $shapeIndex, wind: $wind, points: ${accShape.points.size}, prev ${prev.second}, current: $accHeight")
+                println("previous iteration ${map[key]}, current iteration $its, shapeIndex: $shapeIndex, wind: $wind, points: ${accShape.points.size}, prev ${prev.accumulatedHeight}, current: $accHeight")
 
-                firstRepeat = key to Pair(its, accHeight)
+                firstRepeat = key to Position(its, accHeight)
                 break
 //                same++
             } else {
-                map[key] = Pair(its, accHeight)
+                map[key] = Position(its, accHeight)
             }
+            allShapeMap[its] = accShape
             its++
         }
         val firstPattern = map[firstRepeat.first]!!
-        val loopLength = firstRepeat.second.first - firstPattern.first
-        val loops = (max - firstPattern.first)/loopLength
-        val remaning = firstPattern.first + (max - firstPattern.first)%loopLength
-        val heightPerLoop = firstRepeat.second.second - firstPattern.second
-        val finalPattern = map.entries.find { it.value.first == remaning }!!.key.first
-        return (finalPattern.points.maxOf { it.second } + firstPattern.second + (loops * heightPerLoop)).apply { println() }
+        val loopLength = firstRepeat.second.iterationIndex - firstPattern.iterationIndex
+        val loops = (max - firstPattern.iterationIndex)/loopLength
+        val iteration = max - (loops * loopLength) // should be in 0..firstPattern + loopLength
+        val heightPerLoop = firstRepeat.second.accumulatedHeight - firstPattern.accumulatedHeight
+        val finalPattern = map.entries.find { it.value.iterationIndex == iteration }!!
+        return (finalPattern.key.shape.points.maxOf { it.second } + finalPattern.value.accumulatedHeight + (loops * heightPerLoop)).apply { println() }
 
     }
     private fun simplify(shape: Shape): Pair<Int, Shape> {
@@ -210,6 +216,6 @@ fun main() {
     //previous iteration (2666, 4023), current iteration 4381, shapeIndex: 1, wind: 5600, points: 8, prev 4023, current: 6597
 //    D17.solveb("day17.txt").println() // 10091
 //    D17.solveSampleB().println()
-    D17.solveAManual("day17.txt")
-    D17.solvebManual("day17.txt", 2022)
+//    D17.solveAManual("day17.txt")
+    D17.solvebManual("day17.txt")
 }
