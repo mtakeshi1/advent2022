@@ -79,7 +79,7 @@ interface Solver {
 
     fun List<String>.ints(): List<Int> = intsN().map { it.first() }
     fun List<String>.ints2(): List<Pair<Int, Int>> = intsN().map { Pair(it[0], it[1]) }
-    fun List<String>.ints3(): List<Triple<Int, Int, Int>> = intsN().map { Triple(it[0], it[1], it[1]) }
+    fun List<String>.ints3(): List<Triple<Int, Int, Int>> = intsN().map { Triple(it[0], it[1], it[2]) }
 
     fun List<String>.intsN(): List<List<Int>> {
         val re = Regex("(-?[0-9]+)")
@@ -94,36 +94,27 @@ interface Solver {
 
     fun <A> List<A>.splitAt(index: Int): List<List<A>> = listOf(this.take(index), this.drop(index))
 
-    fun solveb(input: String): Any {
+    fun fileOrString(input: String): List<String> {
         if (File(input).exists()) {
             val reader = BufferedReader(FileReader(input))
-            return solveb(reader.lines().map { it }.toList())
+            return reader.lines().map { it }.toList()
         } else if (File("in", input).exists()) {
             val reader = BufferedReader(FileReader(File("in", input)))
-            return solveb(reader.lines().map { it }.toList())
+            return reader.lines().map { it }.toList()
         } else if (File("advent2022/in", input).exists()) {
             val reader = BufferedReader(FileReader(File("advent2022/in", input)))
-            return solveb(reader.lines().map { it }.toList())
+            return reader.lines().map { it }.toList()
         }
-        return solveb(input.split("\n").toList())
+        return input.split("\n").toList()
+
     }
+
+    fun solveb(input: String): Any = solveb(fileOrString(input)).apply { println(this) }
 
     fun solveb(input: List<String>): Any = solveIb(input.map { Integer.parseInt(it) })
     fun solveIb(input: List<Int>): Any = TODO()
 
-    fun solve(input: String): Any {
-        if (File(input).exists()) {
-            val reader = BufferedReader(FileReader(input))
-            return solve(reader.lines().map { it }.toList())
-        } else if (File("in", input).exists()) {
-            val reader = BufferedReader(FileReader(File("in", input)))
-            return solve(reader.lines().map { it }.toList())
-        } else if (File("advent2022/in", input).exists()) {
-            val reader = BufferedReader(FileReader(File("advent2022/in", input)))
-            return solve(reader.lines().map { it }.toList())
-        }
-        return solve(input.split("\n").toList())
-    }
+    fun solve(input: String): Any = solve(fileOrString(input)).apply { println(this) }
 
     fun solve(input: List<String>): Any = solveI(input.map { Integer.parseInt(it) })
     fun solveI(input: List<Int>): Any = TODO()
