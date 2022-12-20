@@ -171,7 +171,9 @@ object D19 : Solver {
 //                        if (next.turnsLeft > 1 && visitedMap[next.turnsLeft - 1].any { it.isBetterThan(next) }) {
 //                            //do nothing for now
 //                        } else if (visitedMap[nextNext.turnsLeft].add(nextNext)) queue.add(nextNext)
-                        queue.add(nextNext)
+                        val canAdvance = //true
+                            (robot.products().keys - Resource.geode).none { nextResources.getOrDefault(it, 0) > maxRequirements.getOrDefault(it, 0) }
+                        if (canAdvance) queue.add(nextNext)
                     } ?: buildableRobots.forEach { robot ->
                         val nextResources = next.resources.mergeMinus(robot.requirements()).mergePlus(next.robots)
                         val nextRobots = next.robots.mergePlus(robot.products())
@@ -179,7 +181,9 @@ object D19 : Solver {
 //                        if (next.turnsLeft > 1 && visitedMap[next.turnsLeft - 1].any { it.isBetterThan(next) }) {
                             //do nothing for now
 //                        } else if (visitedMap[nextNext.turnsLeft].add(nextNext)) queue.add(nextNext)
-                        queue.add(nextNext)
+                        val canAdvance = //true
+                            (robot.products().keys - Resource.geode).none { nextResources.getOrDefault(it, 0) > maxRequirements.getOrDefault(it, 0) }
+                        if (canAdvance) queue.add(nextNext)
 
                     }
                 }
@@ -262,7 +266,7 @@ object D19 : Solver {
 
 fun main() {
 
-    D19.solveSample(33)
-//    D19.solve("in/day19.txt").println()
+//    D19.solveSample(33)
+    D19.solve("day19.txt").println()
 //D19.solveSampleB(62*56L)
 }
