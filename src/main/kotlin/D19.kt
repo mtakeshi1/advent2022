@@ -74,6 +74,17 @@ object D19 : Solver {
             return (0 until turnsLeft).map { geodesFactory + it }.sum() + resources.getOrDefault(Resource.geode, 0)
         }
 
+        fun maximize(resource: Resource, amount: Int): State {
+            val amountToBuild = amount - this.resources.getOrDefault(resource, 0)
+            if(amountToBuild <= 0) return this
+            else {
+                (0..amountToBuild).forEach {
+
+                }
+                TODO()
+            }
+        }
+
         fun isBetterThan(other: State): Boolean {
             if (this.turnsLeft > other.turnsLeft) return false
             if (this.resources.keys.containsAll(other.resources.keys) && this.resources.all { (resource, amount) ->
@@ -171,9 +182,10 @@ object D19 : Solver {
 //                        if (next.turnsLeft > 1 && visitedMap[next.turnsLeft - 1].any { it.isBetterThan(next) }) {
 //                            //do nothing for now
 //                        } else if (visitedMap[nextNext.turnsLeft].add(nextNext)) queue.add(nextNext)
-                        val canAdvance = //true
-                            (robot.products().keys - Resource.geode).none { nextResources.getOrDefault(it, 0) > maxRequirements.getOrDefault(it, 0) }
-                        if (canAdvance) queue.add(nextNext)
+//                        val canAdvance = //true
+//                            (robot.products().keys - Resource.geode).none { nextResources.getOrDefault(it, 0) > maxRequirements.getOrDefault(it, 0) }
+//                        if (canAdvance)
+                            queue.add(nextNext)
                     } ?: buildableRobots.forEach { robot ->
                         val nextResources = next.resources.mergeMinus(robot.requirements()).mergePlus(next.robots)
                         val nextRobots = next.robots.mergePlus(robot.products())
@@ -181,9 +193,10 @@ object D19 : Solver {
 //                        if (next.turnsLeft > 1 && visitedMap[next.turnsLeft - 1].any { it.isBetterThan(next) }) {
                             //do nothing for now
 //                        } else if (visitedMap[nextNext.turnsLeft].add(nextNext)) queue.add(nextNext)
-                        val canAdvance = //true
-                            (robot.products().keys - Resource.geode).none { nextResources.getOrDefault(it, 0) > maxRequirements.getOrDefault(it, 0) }
-                        if (canAdvance) queue.add(nextNext)
+//                        val canAdvance = //true
+//                            (robot.products().keys - Resource.geode).none { nextResources.getOrDefault(it, 0) > maxRequirements.getOrDefault(it, 0) }
+//                        if (canAdvance)
+                            queue.add(nextNext)
 
                     }
                 }
@@ -245,7 +258,7 @@ object D19 : Solver {
     //Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.
     override fun solve(input: List<String>): Any {
         val best = input.map { it.trim() }.filter { it.isNotEmpty() }.map { parseBlueprint(it) }
-            .map { Pair(it, it.bestMoveBFS()) }
+            .map { Pair(it, it.bestMoveBFS2()) }
 //            .map { it.second.getOrDefault(Resource.geode, 0) }
 //            .maxBy { it.bestMove().getOrDefault(Resource.geode, 0) }
         best.forEach { println("${it.first.id} -> ${it.second} = ${it.first.id * it.second}") }
@@ -267,6 +280,6 @@ object D19 : Solver {
 fun main() {
 
 //    D19.solveSample(33)
-    D19.solve("day19.txt").println()
+    D19.solveb("day19.txt").println()
 //D19.solveSampleB(62*56L)
 }
