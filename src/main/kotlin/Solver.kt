@@ -25,6 +25,7 @@ interface Solver {
         if (message != expected) throw RuntimeException("expected $expected but got: $message")
         println(message)
     }
+
     fun <A> List<A>.allPairs(): List<Pair<A, A>> {
         return if (this.size <= 1) emptyList()
         else {
@@ -34,7 +35,7 @@ interface Solver {
         }
     }
 
-    fun wrappingSequence(max: Int): Sequence<Int> =  generateSequence(0) { if(it + 1 >= max) 0 else it+1 }
+    fun wrappingSequence(max: Int): Sequence<Int> = generateSequence(0) { if (it + 1 >= max) 0 else it + 1 }
 
     fun <A> infiniteSequenceOf(list: List<A>): Sequence<A> = wrappingSequence(list.size).map { list[it % list.size] }
 
@@ -52,8 +53,11 @@ interface Solver {
         }
     }
 
-    fun <A> Map<A, Int>.mergePlus(other: Map<A, Int>): Map<A, Int> = (this.keys + other.keys).map { key -> key to (this.getOrDefault(key, 0) + other.getOrDefault(key, 0)) }.toMap()
-    fun <A> Map<A, Int>.mergeMinus(other: Map<A, Int>): Map<A, Int> = (this.keys + other.keys).map { key -> key to (this.getOrDefault(key, 0) - other.getOrDefault(key, 0)) }.toMap()
+    fun <A> Map<A, Int>.mergePlus(other: Map<A, Int>): Map<A, Int> =
+        (this.keys + other.keys).map { key -> key to (this.getOrDefault(key, 0) + other.getOrDefault(key, 0)) }.toMap()
+
+    fun <A> Map<A, Int>.mergeMinus(other: Map<A, Int>): Map<A, Int> =
+        (this.keys + other.keys).map { key -> key to (this.getOrDefault(key, 0) - other.getOrDefault(key, 0)) }.toMap()
 
     operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
     fun Pair<Int, Int>.distanceFrom(other: Pair<Int, Int>): Int =
@@ -121,4 +125,12 @@ interface Solver {
 
     fun solve(input: List<String>): Any = solveI(input.map { Integer.parseInt(it) })
     fun solveI(input: List<Int>): Any = TODO()
+
+    fun check(v: Boolean) = check("condition failed", v)
+
+    fun check(msg: String, v: Boolean) {
+        if (!v) throw RuntimeException(msg)
+    }
+
+
 }
