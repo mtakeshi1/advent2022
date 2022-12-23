@@ -1,5 +1,7 @@
 package main.kotlin
 
+import kotlin.reflect.KProperty
+
 object D22 : Solver {
 
     override fun sample(): String = """
@@ -147,7 +149,7 @@ object D22 : Solver {
         map.values.forEach { it.linkDefault(map) }
         // link wrapping sides
 
-        TODO("Link wrapping sides")
+        linkWrappings(map)
 
 
         fun moveRecursive(list: String, p: Cell, dir: Direction): Pair<Cell, Direction> {
@@ -158,7 +160,7 @@ object D22 : Solver {
             val rest = list.drop(turns.length)
             val toMove = rest.takeWhile { it != 'R' && it != 'L' }
 
-            val (newPos:Cell, dir2: Direction) = if (toMove.isEmpty()) Pair(p, newDir) else {
+            val (newPos: Cell, dir2: Direction) = if (toMove.isEmpty()) Pair(p, newDir) else {
                 (0 until toMove.toInt()).fold(Pair(p, newDir)) { (pp, dd), _ ->
                     when (dd) {
                         Direction.NORTH -> pp.north
@@ -178,6 +180,109 @@ object D22 : Solver {
         return finalPos.y.y * 1000 + finalPos.x.x * 4 + direction.ordinal
     }
 
+    data class Face(
+        val name: String,
+        val cells: Map<Pair<Horizontal, Vertical>, Cell>,
+        val minX: Horizontal,
+        val maxX: Horizontal,
+        val minY: Vertical,
+        val maxY: Vertical
+    ) {
+
+        constructor(n: String, map: Map<Pair<Horizontal, Vertical>, Cell>, xRange: IntRange, yRange: IntRange) : this(
+            n,
+            map,
+            Horizontal(xRange.first),
+            Horizontal(xRange.last),
+            Vertical(yRange.first),
+            Vertical(yRange.last)
+        )
+
+        fun north(): List<Cell> = (minX.x..maxX.x).map { x -> cells[Pair(Horizontal(x), minY)]!! }
+        fun south(): List<Cell> = (minX.x..maxX.x).map { x -> cells[Pair(Horizontal(x), maxY)]!! }
+
+        fun east(): List<Cell> = (minY.y..maxY.y).map { y -> cells[Pair(maxX, Vertical(y))]!! }
+        fun west(): List<Cell> = (minY.y..maxY.y).map { y -> cells[Pair(minX, Vertical(y))]!! }
+    }
+
+    //    [ ]  A   B
+    //    [ ]  C
+    //     E   D
+    //     F
+    fun faceA(map: Map<Pair<Horizontal, Vertical>, Cell>): Face = Face("A", map, 51..100, 1..50)
+
+    fun faceB(map: Map<Pair<Horizontal, Vertical>, Cell>): Face = Face("B", map, 101..150, 1..50)
+    fun faceC(map: Map<Pair<Horizontal, Vertical>, Cell>): Face = Face("C", map, 51..100, 51..100)
+    fun faceD(map: Map<Pair<Horizontal, Vertical>, Cell>): Face = Face("D", map, 51..100, 101..150)
+    fun faceE(map: Map<Pair<Horizontal, Vertical>, Cell>): Face = Face("E", map, 1..50, 101..150)
+    fun faceF(map: Map<Pair<Horizontal, Vertical>, Cell>): Face = Face("F", map, 1..50, 151..200)
+
+    fun linkWrappings(map: Map<Pair<Horizontal, Vertical>, Cell>) {
+        val faceA: Face = faceA(map)
+        val faceB: Face = faceB(map)
+        val faceC: Face = faceC(map)
+        val faceD: Face = faceD(map)
+        val faceE: Face = faceE(map)
+        val faceF: Face = faceF(map)
+
+        linkEdges(faceA.north(), Direction.NORTH, faceF.west(), Direction.EAST)
+        linkEdges(faceA.west(), Direction.WEST, faceE.west().reversed(), Direction.EAST)
+
+        linkEdges(faceB.north(), Direction.NORTH, faceF.south(), Direction.NORTH)
+        linkEdges(faceB.east(), Direction.EAST, faceD.east().reversed(), Direction.WEST)
+        linkEdges(faceB.south(), Direction.SOUTH, faceC.east(), Direction.WEST)
+
+        linkEdges(faceC.west(), Direction.WEST, faceE.north(), Direction.SOUTH)
+        linkEdges(faceC.east(), Direction.EAST, faceB.south(), Direction.NORTH)
+
+        linkEdges(faceD.east(), Direction.EAST, faceB.east().reversed(), Direction.WEST)  //     D east     B (E -> W) upside down
+        linkEdges(faceD.south(), Direction.SOUTH, faceF.east(), Direction.WEST)//     D south    F (E -> W)
+
+        linkEdges(faceE.north(), Direction.NORTH, faceC.west(), Direction.EAST)//     E north    C (W -> E)
+        linkEdges(faceE.west(), Direction.WEST, faceA.west().reversed(), Direction.EAST)//     E west     A (W -> E) upside down
+
+        linkEdges(faceF.west(), Direction.WEST, faceA.north(), Direction.SOUTH)//     F west     A (N -> S)
+        linkEdges(faceF.south(), Direction.SOUTH, faceB.north(), Direction.SOUTH)//     F south    B (N -> S)
+        linkEdges(faceF.east(), Direction.EAST, faceD.south(), Direction.NORTH)//     F east     D (S -> N)
+    }
+
+    private fun linkEdges(leftBorder: List<Cell>, move: Direction, rightBorder: List<Cell>, newDirection: Direction) {
+        leftBorder.zip(rightBorder).filter { it.first is Path }.forEach { (left, right) ->
+            when (move) {
+                Direction.EAST -> if (right is Wall) left.east = Pair(left, Direction.EAST) else left.east = Pair(right, newDirection)
+                Direction.SOUTH -> if (right is Wall) left.south = Pair(left, Direction.SOUTH) else left.south = Pair(right, newDirection)
+                Direction.WEST -> if (right is Wall) left.west = Pair(left, Direction.WEST) else left.west = Pair(right, newDirection)
+                Direction.NORTH -> if (right is Wall) left.north = Pair(left, Direction.NORTH) else left.north = Pair(right, newDirection)
+            }
+        }
+    }
+
+    /*
+    Faces:
+    [ ]  A   B
+    [ ]  C
+     E   D
+     F
+
+     A north    F (W -> E)
+     A west     E (W -> E) upside down
+     B north    F (S -> N)
+     B east     D (E -> W) upside down
+     B south    C (E -> W)
+     C west     E (N -> S)
+     C east     B (S -> N)
+     D east     B (E -> W) upside down
+     D south    F (E -> W)
+     E north    C (W -> E)
+     E west     A (W -> E) upside down
+     F west     A (N -> S)
+     F south    B (N -> S)
+     F east     D (S -> N)
+
+
+     */
+
+
     interface Cell {
         fun linkDefault(map: Map<Pair<Horizontal, Vertical>, Cell>)
         var east: Pair<Cell, Direction>
@@ -187,24 +292,37 @@ object D22 : Solver {
         val x: Horizontal
         val y: Vertical
     }
+
+    object ErrorDelegate {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): Pair<Cell, Direction> {
+            error("not implemented")
+        }
+
+        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Pair<Cell, Direction>): Unit {
+            error("not implemented")
+        }
+    }
+
     object Wall : Cell {
         override fun linkDefault(map: Map<Pair<Horizontal, Vertical>, Cell>) {}
-        override var east: Pair<Cell, Direction> = TODO()
-        override var south: Pair<Cell, Direction> = TODO()
-        override var west: Pair<Cell, Direction> = TODO()
-        override var north: Pair<Cell, Direction> = TODO()
+        override var east: Pair<Cell, Direction> by ErrorDelegate
+        override var south: Pair<Cell, Direction> by ErrorDelegate
+        override var west: Pair<Cell, Direction> by ErrorDelegate
+        override var north: Pair<Cell, Direction> by ErrorDelegate
         override val x: Horizontal by lazy { TODO() }
         override val y: Vertical by lazy { TODO() }
     }
+
     object Void : Cell {
         override fun linkDefault(map: Map<Pair<Horizontal, Vertical>, Cell>) {}
-        override var east: Pair<Cell, Direction> = TODO()
-        override var south: Pair<Cell, Direction> = TODO()
-        override var west: Pair<Cell, Direction> = TODO()
-        override var north: Pair<Cell, Direction> = TODO()
+        override var east: Pair<Cell, Direction> by ErrorDelegate
+        override var south: Pair<Cell, Direction> by ErrorDelegate
+        override var west: Pair<Cell, Direction> by ErrorDelegate
+        override var north: Pair<Cell, Direction> by ErrorDelegate
         override val x: Horizontal by lazy { TODO() }
         override val y: Vertical by lazy { TODO() }
     }
+
     data class Path(override val x: Horizontal, override val y: Vertical) : Cell {
         override var east: Pair<Cell, Direction> = Pair(this, Direction.EAST)
         override var south: Pair<Cell, Direction> = Pair(this, Direction.EAST)
@@ -233,5 +351,5 @@ object D22 : Solver {
 
 fun main() {
 //    D22.solveSample(6032)
-    D22.solve("day22.txt") // 64210 is too low
+    D22.solveb("day22.txt") // 64210 is too low
 }
