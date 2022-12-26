@@ -1,7 +1,6 @@
-package main.kotlin
+package y2022
 
-import main.kotlin.D19.mergeMinus
-import main.kotlin.D19.mergePlus
+import common.Solver
 import java.util.Comparator
 import java.util.Date
 import java.util.EnumMap

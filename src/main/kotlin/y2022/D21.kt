@@ -1,6 +1,6 @@
-package main.kotlin
+package y2022
 
-import main.kotlin.D21.DoubleOp
+import common.Solver
 import java.math.BigDecimal
 
 object D21 : Solver {

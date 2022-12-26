@@ -1,5 +1,6 @@
-package main.kotlin
+package y2022
 
+import common.Solver
 import kotlin.math.max
 import kotlin.math.min
 

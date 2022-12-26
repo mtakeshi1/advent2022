@@ -1,6 +1,6 @@
-package main.kotlin
+package y2022
 
-import main.kotlin.D12.partitionOnEmpty
+import common.Solver
 import kotlin.math.min
 
 object D13 : Solver {

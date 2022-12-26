@@ -1,7 +1,9 @@
-package main.kotlin
+package y2022
 
-import main.kotlin.D23.printElves
-import java.lang.RuntimeException
+import common.Direction
+import common.Directions
+import common.P2
+import common.Solver
 import java.util.*
 
 

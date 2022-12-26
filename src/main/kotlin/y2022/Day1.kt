@@ -1,4 +1,6 @@
-package main.kotlin
+package y2022
+
+import common.Solver
 
 object Day1 : Solver {
 

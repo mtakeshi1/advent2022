@@ -1,4 +1,4 @@
-package main.kotlin
+package common
 
 data class P2(val x: Int, val y: Int) {
     operator fun plus(other: P2) = P2(this.x + other.x, this.y + other.y)

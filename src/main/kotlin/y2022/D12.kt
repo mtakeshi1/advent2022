@@ -1,5 +1,6 @@
-package main.kotlin
+package y2022
 
+import common.Solver
 import java.util.*
 import kotlin.collections.HashMap
 
