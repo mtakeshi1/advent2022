@@ -21,6 +21,8 @@ object Directions {
     val se = south + east
     val sw = south + west
 
+    val cross = listOf(east, south, west, north)
+
     val allAdjacent = listOf(east, se, south, sw, west, nw, north, ne)
 
 }
