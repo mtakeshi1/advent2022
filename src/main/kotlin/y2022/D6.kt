@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D6 : Solver {
+object D6 : Solver2022 {
 
     fun solveFor(input: String, numChars: Int): Int {
         return input.withIndex().windowed(numChars).find { wordWithIndex ->

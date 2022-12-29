@@ -1,14 +1,12 @@
 package common
 
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileReader
 import java.lang.RuntimeException
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
 interface Solver {
+
 
     fun sample(): String = ""
 
@@ -46,7 +44,6 @@ interface Solver {
         else {
             val remaining =
                 this.indices.map { Pair(this[it], this.drop(it + 1)) }.filter { it.second.size >= (size - 1) }
-//            println(remaining)
             return remaining.flatMap { (el, rest) ->
                 rest.allCombinations(size - 1).map { listOf(el) + it }
             }
@@ -101,21 +98,6 @@ interface Solver {
 
     fun <A> List<A>.splitAt(index: Int): List<List<A>> = listOf(this.take(index), this.drop(index))
 
-    fun fileOrString(input: String): List<String> {
-        if (File(input).exists()) {
-            val reader = BufferedReader(FileReader(input))
-            return reader.lines().map { it }.toList()
-        } else if (File("in", input).exists()) {
-            val reader = BufferedReader(FileReader(File("in", input)))
-            return reader.lines().map { it }.toList()
-        } else if (File("advent2022/in", input).exists()) {
-            val reader = BufferedReader(FileReader(File("advent2022/in", input)))
-            return reader.lines().map { it }.toList()
-        }
-        return input.split("\n").toList()
-
-    }
-
     fun solveb(input: String): Any = solveb(fileOrString(input)).apply { println(this) }
 
     fun solveb(input: List<String>): Any = solveIb(input.map { Integer.parseInt(it) })
@@ -132,5 +114,5 @@ interface Solver {
         if (!v) throw RuntimeException(msg)
     }
 
-
+    fun fileOrString(input: String): List<String>;
 }

@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import kotlin.math.min
 
-object D13 : Solver {
+object D13 : Solver2022 {
 
     interface Signal : Comparable<Signal> {
         override fun compareTo(other: Signal): Int

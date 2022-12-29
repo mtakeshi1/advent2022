@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D25 : Solver {
+object D25 : Solver2022 {
 
     override fun sample(): String = """
         1=-0-2

@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D3 : Solver {
+object D3 : Solver2022 {
 
     fun score(c: Char): Int = if (Character.isUpperCase(c)) (c - 'A') + 27 else c - 'a' + 1
 

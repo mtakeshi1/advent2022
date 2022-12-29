@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import kotlin.reflect.KProperty
 
-object D22 : Solver {
+object D22 : Solver2022 {
 
     override fun sample(): String = """
                 ...#

@@ -1,10 +1,10 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import java.util.*
 import kotlin.collections.HashMap
 
-object D12 : Solver {
+object D12 : Solver2022 {
 
     val dirs = listOf(Pair(1, 0), Pair(-1, 0), Pair(0, 1), Pair(0, -1))
 

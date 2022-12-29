@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D20 : Solver {
+object D20 : Solver2022 {
 
     override fun sample(): String = "1\n" +
             "2\n" +

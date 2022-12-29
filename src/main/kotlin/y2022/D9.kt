@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import kotlin.math.abs
 
-object D9 : Solver {
+object D9 : Solver2022 {
 
     fun Pair<Int, Int>.move(direction: String): Pair<Int, Int> {
         return when (direction) {

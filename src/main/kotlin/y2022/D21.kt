@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import java.math.BigDecimal
 
-object D21 : Solver {
+object D21 : Solver2022 {
 
     override fun sample(): String = """
         root: pppw + sjmn

@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D2 : Solver {
+object D2 : Solver2022 {
 
     val combinationsA = listOf(
         mapOf("Z" to "C", "Y" to "B", "X" to "A"),

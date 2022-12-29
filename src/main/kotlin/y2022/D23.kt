@@ -3,11 +3,11 @@ package y2022
 import common.Direction
 import common.Directions
 import common.P2
-import common.Solver
+import common.Solver2022
 import java.util.*
 
 
-object D23 : Solver {
+object D23 : Solver2022 {
 
 
 //    override fun sample(): String = """

@@ -1,11 +1,11 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import kotlin.math.max
 import kotlin.math.min
 
 
-object D14 : Solver {
+object D14 : Solver2022 {
 
 
     val dropDirections = listOf(Pair(0, 1), Pair(-1, 1), Pair(1, 1))

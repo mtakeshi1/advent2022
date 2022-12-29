@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object Day1 : Solver {
+object Day1 : Solver2022 {
 
     fun sumAll(input: List<String>): List<Long> {
         return if (input.isEmpty()) listOf()

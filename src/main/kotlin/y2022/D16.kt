@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import java.util.*
 
-object D16 : Solver {
+object D16 : Solver2022 {
 
     override fun sample(): String = """
         Valve AA has flow rate=0; tunnels lead to valves DD, II, BB

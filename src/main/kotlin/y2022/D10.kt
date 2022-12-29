@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D10 : Solver {
+object D10 : Solver2022 {
 
     interface Cmd {
         fun apply(x: Int): Pair<Int, Cmd>

@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import java.util.*
 
-object D5 : Solver {
+object D5 : Solver2022 {
 
     data class Move(val num: Int, val from: Int, val to: Int) {
         fun apply(stacks: List<Deque<String>>): List<Deque<String>> {

@@ -3,7 +3,7 @@ package y2022
 import common.*
 import kotlin.math.abs
 
-object D24 : Solver {
+object D24 : Solver2022 {
 
     // TODO check < and ^
 

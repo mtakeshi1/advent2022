@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import java.util.LinkedList
 
-object D18 : Solver {
+object D18 : Solver2022 {
 
     data class Cube(val x: Int, val y: Int, val z: Int) {
         var faceCount = 6

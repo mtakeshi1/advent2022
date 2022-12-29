@@ -1,6 +1,6 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import java.util.Comparator
 import java.util.Date
 import java.util.EnumMap
@@ -8,7 +8,7 @@ import java.util.LinkedHashSet
 import java.util.PriorityQueue
 
 
-object D19 : Solver {
+object D19 : Solver2022 {
 
     override fun sample(): String = """
     Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.

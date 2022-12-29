@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D11 : Solver {
+object D11 : Solver2022 {
 
     data class Monkey(
         val id: Int,

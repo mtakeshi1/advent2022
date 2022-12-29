@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import java.util.TreeMap
 
-object D17 : Solver {
+object D17 : Solver2022 {
 
     val floor = 0
     val leftWall = 0

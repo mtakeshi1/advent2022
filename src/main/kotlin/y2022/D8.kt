@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D8 : Solver {
+object D8 : Solver2022 {
 
     fun checkVisibility(matrix: List<List<Int>>, known: MutableSet<Pair<Int, Int>>, position: Pair<Int, Int>) {
         if(!known.contains(position)) {

@@ -1,9 +1,9 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 import kotlin.math.abs
 
-object D15 : Solver {
+object D15 : Solver2022 {
 
     data class Sensor(val x: Int, val y: Int, val beacon: Pair<Int, Int>) {
         fun distanceToBeacon() = distanceTo(beacon)

@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D4 : Solver {
+object D4 : Solver2022 {
 
     data class Range(val from: Int, val to: Int) {
         fun contains(other: Range): Boolean = from <= other.from && to >= other.to

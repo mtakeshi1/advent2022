@@ -1,8 +1,8 @@
 package y2022
 
-import common.Solver
+import common.Solver2022
 
-object D7 : Solver {
+object D7 : Solver2022 {
 
     private fun parseCommands(input: List<String>): Map<List<String>, Long> {
         val map: MutableMap<List<String>, Long> = HashMap()
