@@ -10,6 +10,8 @@ interface Solver {
 
     fun sample(): String = ""
 
+    fun sampleB(): String = sample()
+
     fun solveSample() = println(solve(sample()))
     fun solveSample(expected: Any) {
         val message = solve(sample())
@@ -17,9 +19,9 @@ interface Solver {
         println(message)
     }
 
-    fun solveSampleB() = println(solveb(sample()))
+    fun solveSampleB() = println(solveb(sampleB()))
     fun solveSampleB(expected: Any) {
-        val message = solveb(sample())
+        val message = solveb(sampleB())
         if (message != expected) throw RuntimeException("expected $expected but got: $message")
         println(message)
     }
