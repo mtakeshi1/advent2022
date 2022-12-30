@@ -41,12 +41,12 @@ interface Solver {
 
 
     fun <A> List<A>.allCombinations(size: Int): List<List<A>> {
-        if (this.isEmpty() || this.size < size) return emptyList()
-        else if (size == 1) return this.map { listOf(it) }
+        return if (this.isEmpty() || this.size < size) emptyList()
+        else if (size == 1) this.map { listOf(it) }
         else {
             val remaining =
                 this.indices.map { Pair(this[it], this.drop(it + 1)) }.filter { it.second.size >= (size - 1) }
-            return remaining.flatMap { (el, rest) ->
+            remaining.flatMap { (el, rest) ->
                 rest.allCombinations(size - 1).map { listOf(el) + it }
             }
         }
@@ -83,12 +83,18 @@ interface Solver {
         return if (rest.isEmpty()) head else head + rest.partitionOnEmpty()
     }
 
+    fun intRegex() = Regex("(-?[0-9]+)")
+
+    fun String.anyInt(): Int? {
+        return intRegex().find(this)?.value?.toInt()
+    }
+
     fun List<String>.ints(): List<Int> = intsN().map { it.first() }
     fun List<String>.ints2(): List<Pair<Int, Int>> = intsN().map { Pair(it[0], it[1]) }
     fun List<String>.ints3(): List<Triple<Int, Int, Int>> = intsN().map { Triple(it[0], it[1], it[2]) }
 
     fun List<String>.intsN(): List<List<Int>> {
-        val re = Regex("(-?[0-9]+)")
+        val re = intRegex()
         return this.map { re.findAll(it).toList().map { found -> found.value.toInt() } }
     }
 
