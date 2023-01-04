@@ -127,8 +127,9 @@ object D20 : Solver2020 {
         val availableCubes = mutableMapOf<Long, Cube>()
         cubes.values.forEach{c -> availableCubes[c.id] = c }
 
-        picture[0][0] = corners.first()
-        availableCubes.remove(corners.first().id)
+        val firstCorner = corners.first()
+        picture[0][0] = (allTransformations.map { it.transform(firstCorner) } + firstCorner).find { c -> map[c.north()]!!.size == 1 && map[c.west()]!!.size == 1 }!!
+        availableCubes.remove(picture[0][0].id)
 
         fun canMatchEdge(row: Int, col: Int): Boolean {
             if (row == 0 || col == 0 || row == dim - 1 || col == dim - 1) {
@@ -158,7 +159,7 @@ object D20 : Solver2020 {
                 return if(row == dim-1)  {
                     Predicate { c -> localMap[c.south()]!!.size == 1 }
                 } else if(picture[row + 1][col].id != 0L) {
-                    Predicate { c -> picture[row - 1][col].north() == c.south() }
+                    Predicate { c -> picture[row + 1][col].north() == c.south() }
                 } else {
                     Predicate { c -> localMap[c.south()]!!.size > 1 }
                 }
@@ -184,13 +185,16 @@ object D20 : Solver2020 {
 
             fun candidates2(row: Int, col: Int): List<Cube> {
                 val predicate = northConstraint(row, col).and(southContraint(row, col)).and(eastConstraint(row, col)).and ( westConstraint(row, col) )
-                return allCubesTransformed.filter { predicate.test(it) }
+                return allCubesTransformed.filter {
+                    predicate.test(it)
+                }
             }
 
             (0 until dim).forEach { x ->
                 (0 until dim).forEach { y ->
                     if (picture[x][y].id == 0L && canMatchEdge(x, y)) {
                         val candidates = candidates2(x, y)
+                        check(candidates.isNotEmpty())
                         if (candidates.size == 1) {
                             val cube = candidates.first()
                             availableCubes.remove(cube.id)
@@ -212,9 +216,16 @@ object D20 : Solver2020 {
             line.withIndex().filter { it.value == '#' }.map { it.index }
         }
         val cubeList = allTransformations.map { it.transform(tiled) }
-        return cubeList.map { cube -> val body = cube.body.map { it.joinToString  ("")  }
-            countPatterns(body, pattern)
-        }.max()
+        val maxCube = cubeList.map {cube->
+            val body = cube.body.map { it.joinToString  ("")  }
+            Pair(cube, countPatterns(body, pattern))
+        }.maxBy { it.second }
+        val totalRough = maxCube.first.body.sumOf { it.count { c -> c == '#' } }
+        val monsters = pattern.sumOf { it.size }
+//        return cubeList.map { cube -> val body = cube.body.map { it.joinToString  ("")  }
+//            countPatterns(body, pattern)
+//        }.max()
+        return totalRough - monsters * maxCube.second
     }
 
     fun find(map: List<String>, pattern: List<List<Int>>, row: Int, col: Int): Boolean {
@@ -253,4 +264,5 @@ object D20 : Solver2020 {
 fun main() {
 //    D20.solveSample(20899048083289L)
     D20.solveb("day20.txt")
+//    D20.solveSampleB()
 }
