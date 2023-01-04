@@ -21,6 +21,13 @@ object D20 : Solver2020 {
         fun column(c: Int) = body.map { it[c] }
 
         fun sides() = listOf(north(), east(), west(), south())
+        fun trimEdges() = Cube(id, body.take(body.size-1).drop(1).map { it.subList(1, it.size-1) })
+        fun join(cube: Cube): Cube {
+            check(cube.body.size == this.body.size)
+            val newBody: List<List<Char>>  = this.body.mapIndexed { row, list -> list + cube.body[row] }
+            return Cube(0L, newBody)
+        }
+
     }
 
     fun interface CubeTransformation {
@@ -117,11 +124,11 @@ object D20 : Solver2020 {
         val dim = sqrt(cubes.size.toDouble()).toInt()
         val picture = Array(dim) { Array(dim) { Cube(0, emptyList()) } }
 
-        val availableCubes = mutableSetOf<Cube>()
-        cubes.values.forEach(availableCubes::add)
+        val availableCubes = mutableMapOf<Long, Cube>()
+        cubes.values.forEach{c -> availableCubes[c.id] = c }
 
         picture[0][0] = corners.first()
-        availableCubes.remove(corners.first())
+        availableCubes.remove(corners.first().id)
 
         fun canMatchEdge(row: Int, col: Int): Boolean {
             if (row == 0 || col == 0 || row == dim - 1 || col == dim - 1) {
@@ -132,14 +139,11 @@ object D20 : Solver2020 {
 
         while (availableCubes.isNotEmpty()) {
             val localMap = mutableMapOf<List<Char>, MutableSet<Long>>()
-            availableCubes.flatMap { cube -> allTransformations.map { tx -> tx.transform(cube) } + cube }.forEach { cube ->
+            val allCubesTransformed = mutableSetOf<Cube>()
+            availableCubes.values.flatMap { cube -> allTransformations.map { tx -> tx.transform(cube) } + cube }.forEach { cube ->
+                allCubesTransformed.add(cube)
                 cube.sides().forEach { side -> localMap.computeIfAbsent(side) { HashSet() }.add(cube.id) }
             }
-
-            val cubeToTransformations =
-                availableCubes.associateWith { cube -> (allTransformations.map { tx -> tx.transform(cube) } + cube).toSet() }
-            val transformationsToCube =
-                cubeToTransformations.flatMap { entry -> entry.value.map { it to entry.key } }.toMap()
 
             fun northConstraint(row: Int, col: Int): Predicate<Cube> {
                 return if(row == 0)  {
@@ -180,19 +184,18 @@ object D20 : Solver2020 {
 
             fun candidates2(row: Int, col: Int): List<Cube> {
                 val predicate = northConstraint(row, col).and(southContraint(row, col)).and(eastConstraint(row, col)).and ( westConstraint(row, col) )
-                return cubeToTransformations.values.flatten().filter { predicate.test(it) }
+                return allCubesTransformed.filter { predicate.test(it) }
             }
 
             (0 until dim).forEach { x ->
-                println("starting row: $x")
                 (0 until dim).forEach { y ->
                     if (picture[x][y].id == 0L && canMatchEdge(x, y)) {
                         val candidates = candidates2(x, y)
                         if (candidates.size == 1) {
                             val cube = candidates.first()
-                            availableCubes.remove(transformationsToCube[cube]!!)
+                            availableCubes.remove(cube.id)
                             picture[x][y] = cube
-                            println("inserting cube at $x $y with id ${cube.id}")
+                            println("inserting cube at $x $y with id ${cube.id} - remaining: ${availableCubes.size}")
                         }
                     }
 
@@ -200,7 +203,50 @@ object D20 : Solver2020 {
             }
         }
 
-        return 1
+        picture.forEach { arr -> arr.forEach { cube -> check(cube.id != 0L) } }
+        val tiled: Cube = buildPicture(picture)
+        val patternString = arrayOf("                  # ",
+                                    "#    ##    ##    ###",
+                                    " #  #  #  #  #  #")
+        val pattern = patternString.map { line ->
+            line.withIndex().filter { it.value == '#' }.map { it.index }
+        }
+        val cubeList = allTransformations.map { it.transform(tiled) }
+        return cubeList.map { cube -> val body = cube.body.map { it.joinToString  ("")  }
+            countPatterns(body, pattern)
+        }.max()
+    }
+
+    fun find(map: List<String>, pattern: List<List<Int>>, row: Int, col: Int): Boolean {
+        if(map.size < row + 2) return false
+        val first = pattern[0]
+        val second = pattern[1]
+        val third = pattern[2]
+        if(first.all { index ->
+                map[row].length > index+col && map[row][index+col] == '#'
+            } &&
+            second.all { index -> map[row+1].length > index+col && map[row+1][index+col] == '#' } &&
+            third.all { index -> map[row+2].length > index+col && map[row+2][index+col] == '#' }) return true
+        return false
+    }
+
+    private fun countPatterns(map: List<String>, pattern: List<List<Int>>): Int {
+        val maxCol = pattern.maxOf { it.max() }
+        return (0 until map.size-2).map { rowI ->
+            val row = map[rowI]
+            (row.indices).count { colI ->
+                find(map, pattern, rowI, colI)
+            }
+        }.sum()
+    }
+
+    private fun buildPicture(picture: Array<Array<Cube>>): Cube {
+        val trimmed: List<List<Cube>> = picture.map { row -> row.map { it.trimEdges() } }
+        val newBody = trimmed.map { row ->
+            row.reduce { acc, cube -> acc.join(cube) }
+        }.map { it.body }.reduce{a, b -> a + b}
+        newBody.forEach { println(it.joinToString("")) }
+        return Cube(0L, newBody)
     }
 }
 
