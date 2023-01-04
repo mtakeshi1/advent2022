@@ -1,6 +1,7 @@
 package y2020
 
 import advent2020.Solver2020
+import java.util.function.Predicate
 import kotlin.math.sqrt
 
 object D20 : Solver2020 {
@@ -118,23 +119,86 @@ object D20 : Solver2020 {
 
         val availableCubes = mutableSetOf<Cube>()
         cubes.values.forEach(availableCubes::add)
-        availableCubes.removeAll(corners)
 
         picture[0][0] = corners.first()
-        fun fill( row: Int,  col: Int) {
-            availableCubes.filter { cube ->
-                val rotated = allTransformations.map { tx -> tx.transform(cube) } + cube
-                rotated.any {
-                        c -> map[c.north()]!!.size == 1 && c.west() == corners.first().east()
+        availableCubes.remove(corners.first())
+
+        fun canMatchEdge(row: Int, col: Int): Boolean {
+            if (row == 0 || col == 0 || row == dim - 1 || col == dim - 1) {
+                return true
+            }
+            return picture[row - 1][col].id != 0L || picture[row + 1][col].id != 0L || picture[row][col - 1].id != 0L || picture[row][col + 1].id != 0L
+        }
+
+        while (availableCubes.isNotEmpty()) {
+            val localMap = mutableMapOf<List<Char>, MutableSet<Long>>()
+            availableCubes.flatMap { cube -> allTransformations.map { tx -> tx.transform(cube) } + cube }.forEach { cube ->
+                cube.sides().forEach { side -> localMap.computeIfAbsent(side) { HashSet() }.add(cube.id) }
+            }
+
+            val cubeToTransformations =
+                availableCubes.associateWith { cube -> (allTransformations.map { tx -> tx.transform(cube) } + cube).toSet() }
+            val transformationsToCube =
+                cubeToTransformations.flatMap { entry -> entry.value.map { it to entry.key } }.toMap()
+
+            fun northConstraint(row: Int, col: Int): Predicate<Cube> {
+                return if(row == 0)  {
+                    Predicate { c -> localMap[c.north()]!!.size == 1 }
+                } else if(picture[row - 1][col].id != 0L) {
+                    Predicate { c -> picture[row - 1][col].south() == c.north() }
+                } else {
+                    Predicate { c -> localMap[c.north()]!!.size > 1 }
+                }
+            }
+            fun southContraint(row: Int, col: Int): Predicate<Cube> {
+                return if(row == dim-1)  {
+                    Predicate { c -> localMap[c.south()]!!.size == 1 }
+                } else if(picture[row + 1][col].id != 0L) {
+                    Predicate { c -> picture[row - 1][col].north() == c.south() }
+                } else {
+                    Predicate { c -> localMap[c.south()]!!.size > 1 }
+                }
+            }
+            fun eastConstraint(row: Int, col: Int): Predicate<Cube> {
+                return if(col == dim-1)  {
+                    Predicate { c -> localMap[c.east()]!!.size == 1 }
+                } else if(picture[row][col + 1].id != 0L) {
+                    Predicate { c -> picture[row][col + 1].west() == c.east() }
+                } else {
+                    Predicate { c -> localMap[c.east()]!!.size > 1 }
+                }
+            }
+            fun westConstraint(row: Int, col: Int): Predicate<Cube> {
+                return if(col == 0)  {
+                    Predicate { c -> localMap[c.west()]!!.size == 1 }
+                } else if(picture[row][col - 1].id != 0L) {
+                    Predicate { c -> picture[row][col - 1].east() == c.west() }
+                } else {
+                    Predicate { c -> localMap[c.west()]!!.size > 1 }
+                }
+            }
+
+            fun candidates2(row: Int, col: Int): List<Cube> {
+                val predicate = northConstraint(row, col).and(southContraint(row, col)).and(eastConstraint(row, col)).and ( westConstraint(row, col) )
+                return cubeToTransformations.values.flatten().filter { predicate.test(it) }
+            }
+
+            (0 until dim).forEach { x ->
+                println("starting row: $x")
+                (0 until dim).forEach { y ->
+                    if (picture[x][y].id == 0L && canMatchEdge(x, y)) {
+                        val candidates = candidates2(x, y)
+                        if (candidates.size == 1) {
+                            val cube = candidates.first()
+                            availableCubes.remove(transformationsToCube[cube]!!)
+                            picture[x][y] = cube
+                            println("inserting cube at $x $y with id ${cube.id}")
+                        }
+                    }
+
                 }
             }
         }
-        val nextCube = availableCubes.filter { cube ->
-            val rotated = allTransformations.map { tx -> tx.transform(cube) } + cube
-            rotated.any { c -> map[c.north()]!!.size == 1 && c.west() == corners.first().east() }
-        }
-
-        check(nextCube.size == 1)
 
         return 1
     }
